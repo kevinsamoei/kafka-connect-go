@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/google/logger"
 	"github.com/pkg/errors"
+	logger "github.com/sirupsen/logrus"
+	"os"
 	"strconv"
 
 	"net"
@@ -39,6 +40,18 @@ func NewConnect(url string) Connect {
 
 	return connect
 }
+// set up the logger
+func init() {
+	// Log as JSON instead of the default ASCII formatter.
+	logger.SetFormatter(&logger.JSONFormatter{})
+
+	// Output to stdout instead of the default stderr
+	// Can be any io.Writer, see below for File example
+	logger.SetOutput(os.Stdout)
+
+	// Only log the warning severity or above.
+	logger.SetLevel(logger.InfoLevel)
+}
 
 // GetConnectors gets a list of all active connectors
 // curl -i -H "Accept:application/json" http://localhost:8083/connectors/
@@ -68,7 +81,7 @@ func (c *connect) GetConnectors() (*GetAllConnectorsResponse, error) {
 func (c *connect) CreateConnector(req ConnectorRequest) (*ConnectorResponse,error) {
 	body, err := json.Marshal(req)
 	if err != nil {
-		logger.Errorf("error marshalling the connector request: %v", err)
+		logger.WithError(err).Errorf("error marshalling the connector request: %v", err)
 		return nil, err
 	}
 
@@ -78,10 +91,11 @@ func (c *connect) CreateConnector(req ConnectorRequest) (*ConnectorResponse,erro
 		SetResult(&response).
 		Post("connectors")
 	if err != nil {
+		logger.WithError(err).Error("could not create client")
 		return nil, err
 	}
 
-	logger.Infof("Create connector response: %v", resp)
+	logger.WithField("create connector response", resp.String()).Info("Create connector response")
 
 	if resp.StatusCode() >= 400 {
 		logger.Errorf("Create connector failed with status code: %v", resp.StatusCode())
