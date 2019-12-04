@@ -1,8 +1,9 @@
 package connect
 
+// FIXME: better name for this
 // ConnectorPayload is the kafka connect connector registration information
 type ConnectorRequest struct {
-	Name   string              `json:"name"`
+	Name   string                 `json:"name"`
 	Config map[string]interface{} `json:"config"`
 }
 
@@ -75,19 +76,19 @@ type TaskStatus struct {
 }
 
 type ConnectorPluginsResponse struct {
-	Code int
+	Code  int
 	Class string `json:"class"`
 }
 
 type ValidateConnectorPluginResponse struct {
-	Code int
-	Name string `json:"name"`
-	ErrorCount int `json:"error_count"`
-	Groups  []string `json:"groups"`
-	Configs Config
+	Code       int
+	Name       string   `json:"name"`
+	ErrorCount int      `json:"error_count"`
+	Groups     []string `json:"groups"`
+	Configs    Config
 }
 
-type Config struct{
+type Config struct {
 	Definition map[string]interface{} `json:"definition"`
-	Value map[string]interface{} `json:"value"`
+	Value      map[string]interface{} `json:"value"`
 }
