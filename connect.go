@@ -16,7 +16,7 @@ import (
 
 // connect holds the default configs for the connect client
 type connect struct {
-	client *resty.Client
+	client      *resty.Client
 	connectHost string
 }
 
@@ -40,6 +40,7 @@ func NewConnect(url string) Connect {
 
 	return connect
 }
+
 // set up the logger
 func init() {
 	// Log as JSON instead of the default ASCII formatter.
@@ -78,7 +79,7 @@ func (c *connect) GetConnectors() (*GetAllConnectorsResponse, error) {
 // CreateConnector creates a kafka connector
 // curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @replicator.json
 // https://docs.confluent.io/current/connect/references/restapi.html#post--connectors
-func (c *connect) CreateConnector(req ConnectorRequest) (*ConnectorResponse,error) {
+func (c *connect) CreateConnector(req ConnectorRequest) (*ConnectorResponse, error) {
 	body, err := json.Marshal(req)
 	if err != nil {
 		logger.WithError(err).Errorf("error marshalling the connector request: %v", err)
@@ -109,7 +110,7 @@ func (c *connect) CreateConnector(req ConnectorRequest) (*ConnectorResponse,erro
 // GetConnector is used to get information about a connector.
 // curl -i -H "Accept:application/json" http://localhost:8083/connectors/(string:name)
 // https://docs.confluent.io/current/connect/references/restapi.html#get--connectors-(string-name)
-func (c *connect) GetConnector(connectorName string) (*ConnectorResponse,error) {
+func (c *connect) GetConnector(connectorName string) (*ConnectorResponse, error) {
 	// get connector
 	response := new(ConnectorResponse)
 	resp, err := c.client.NewRequest().
@@ -308,7 +309,7 @@ func (c *connect) GetConnectorTasks(connectorName string) (*GetConnectorTasksRes
 // GetConnectorTaskStatus gets a task’s status
 // https://docs.confluent.io/current/connect/references/restapi.html#get--connectors-(string-name)-tasks-(int-taskid)-status
 func (c *connect) GetConnectorTaskStatus(connectorName string, taskId int) (*TaskStatusResponse, error) {
-	response :=  new(TaskStatusResponse)
+	response := new(TaskStatusResponse)
 
 	resp, err := c.client.NewRequest().
 		SetResult(&response).
@@ -329,7 +330,7 @@ func (c *connect) GetConnectorTaskStatus(connectorName string, taskId int) (*Tas
 // RestartConnectorTask restarts an individual task.
 // https://docs.confluent.io/current/connect/references/restapi.html#post--connectors-(string-name)-tasks-(int-taskid)-restart
 func (c *connect) RestartConnectorTask(connectorName string, taskId int) (*EmptyResponse, error) {
-	response :=  new(EmptyResponse)
+	response := new(EmptyResponse)
 
 	resp, err := c.client.NewRequest().
 		SetResult(&response).
@@ -352,8 +353,8 @@ func (c *connect) RestartConnectorTask(connectorName string, taskId int) (*Empty
 // which means it is possible to see inconsistent results,
 // especially during a rolling upgrade if you add new connector jars
 // https://docs.confluent.io/current/connect/references/restapi.html#get--connector-plugins-
-func (c *connect) GetConnectorPlugins()(*ConnectorPluginsResponse, error) {
-	response :=  new(ConnectorPluginsResponse)
+func (c *connect) GetConnectorPlugins() (*ConnectorPluginsResponse, error) {
+	response := new(ConnectorPluginsResponse)
 
 	resp, err := c.client.NewRequest().
 		SetResult(&response).
@@ -374,7 +375,7 @@ func (c *connect) GetConnectorPlugins()(*ConnectorPluginsResponse, error) {
 // This API performs per config validation, returns suggested values and error messages during validation.
 // https://docs.confluent.io/current/connect/references/restapi.html#put--connector-plugins-(string-name)-config-validate
 func (c *connect) ValidatePluginConfig(pluginName string, request ConnectorRequest) (*ValidateConnectorPluginResponse, error) {
-	response :=  new(ValidateConnectorPluginResponse)
+	response := new(ValidateConnectorPluginResponse)
 
 	resp, err := c.client.NewRequest().
 		SetResult(&response).
@@ -427,4 +428,5 @@ func createTransport() http.RoundTripper {
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 }
+
 var _ Connect = (*connect)(nil)
